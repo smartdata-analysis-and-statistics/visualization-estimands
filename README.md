@@ -29,6 +29,16 @@ All R code from this project is located in this repository. To run the
 simulation, use `runSimulation.r`. For the visualization functions, use
 `/R/visualisation.r`.
 
+The code contains two scenarios:
+
+- Scenario 1: Absence of treatment effect heterogeneity
+
+- Scenario 2: Presence of treatment effect heterogeneity (used in the
+  appendix of the manuscript)
+
+Depending on the selected scenario, the values for $\beta_5$ and
+$\beta_6$ were modified.
+
 ------------------------------------------------------------------------
 
 ### Data-generating mechanism
@@ -52,76 +62,30 @@ $\mu_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \beta_3 I_{Bi} + \beta_4 I_
 
 Using the following regression coefficients:
 
--   Baseline outcome risk ($\beta_0$): **0**
--   Confounder effect of $x_1$ ($\beta_1$): **1**
--   Confounder effect of $x_2$ ($\beta_2$): **0.25**
--   Treatment effect of B versus A ($\beta_3$): **-0.5**
--   Treatment effect of C versus A ($\beta_4$): **-0.25**
--   Standard deviation of the residual error ($\sigma$): **1**
+- Baseline outcome risk ($\beta_0$): **0**
+- Confounder effect of $x_1$ ($\beta_1$): **1**
+- Confounder effect of $x_2$ ($\beta_2$): **0.25**
+- Treatment effect of B versus A ($\beta_3$): **-0.5**
+- Treatment effect of C versus A ($\beta_4$): **-0.25**
+- Standard deviation of the residual error ($\sigma$): **1**
 
 Two scenarios were evaluated in the simulations by modifying the values
 for $\beta_5$ and $\beta_6$.
 
 **Scenario 1**: Absence of treatment effect heterogeneity (HTE)
 
--   Effect modification between B and x1 ($\beta_5$): **0**
--   Effect modification between C and x1 ($\beta_6$): **0**
+- Effect modification between B and x1 ($\beta_5$): **0**
+- Effect modification between C and x1 ($\beta_6$): **0**
 
 **Scenario 2**: Presence of HTE
 
--   Effect modification between B and x1 ($\beta_5$): **0.25**
--   Effect modification between C and x1 ($\beta_6$): **0.125**
+- Effect modification between B and x1 ($\beta_5$): **0.25**
+- Effect modification between C and x1 ($\beta_6$): **0.125**
 
 We assigned the treatment received as a function of the two baseline
 covariates $x_1$ and $x_2$. Thus, the observable dataset consisted of
 the two baseline covariates, the treatment received and one outcome –
 the one generated under the treatment that the patient received.
-
-### Sampling distributions and parameter information
-
-The treatment groups were sampled in equal sizes. The two continuous
-variables $x_1$ and $x_2$ were drawn from a bivariate normal
-distribution using the *mvtnorm* package, using the following mean
-values:
-
-| Treatment | Mean age | Mean disease severity |
-|:----------|---------:|----------------------:|
-| A         |        1 |                    -1 |
-| B         |        0 |                     1 |
-| C         |       -1 |                    -1 |
-
-Sampling means
-
-And the following covariance matrix:
-
-|     |  x1 |  x2 |
-|:----|----:|----:|
-| x1  |   2 |   0 |
-| x2  |   0 |   2 |
-
-Variance-covariance matrix of the baseline covariates
-
-### Directed acyclic graph
-
-To illustrate the relation between the treatment, the outcome and the
-treatment covariate interactions, a Directed acyclic graph is used. A,
-B, and C indicate the three treatment groups, Y is the outcome and x1
-and x2 depict the covariates (age and disease severity). Both covariates
-influence the outcome $y_i$, but only in the presence of HTE do they
-also influence treatment B and C.
-
-#### Scenario 1: Absence of HTE
-
-<br />  
-DAG in the absence of HTE
-
-![](README_files/figure-gfm/dag-scenario1-1.png)<!-- -->
-
-#### Scenario 2: Presence of HTE
-
-<br /> DAG in the presence of HTE
-
-![](README_files/figure-gfm/dag-scenario2-1.png)<!-- -->
 
 ### Implementation of pairwise matching
 

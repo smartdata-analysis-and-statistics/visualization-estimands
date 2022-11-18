@@ -7,6 +7,14 @@ Propensity score matching is among the most popular confounding adjustment metho
 
 All R code from this project is located in this repository. To run the simulation, use `runSimulation.r`. For the visualization functions, use `/R/visualisation.r`. 
 
+The code contains two scenarios:
+
+- Scenario 1: Absence of treatment effect heterogeneity
+
+- Scenario 2: Presence of treatment effect heterogeneity (used in the appendix of the manuscript)
+
+Depending on the selected scenario, the values for $\beta_5$ and $\beta_6$ were modified.
+
 ---
 
 ```{r setup, include=FALSE}
@@ -75,90 +83,6 @@ Two scenarios were evaluated in the simulations by modifying the values for $\be
 
 We assigned the treatment received as a function of the two baseline covariates $x_1$ and $x_2$. Thus, the observable dataset consisted of the two baseline covariates, the treatment received and one outcome – the one generated under the treatment that the patient received.  
 
-### Sampling distributions and parameter information
-
-The treatment groups were sampled in equal sizes. The two continuous variables $x_1$ and $x_2$ were drawn from a bivariate normal distribution using the *mvtnorm* package, using the following mean values:
-
-```{r, include = T}
-t.simpar <- data.frame(
-  treatment = c("A", "B", "C"), 
-  x1_mean = c(1, 0, -1),
-  x2_mean = c(-1, 1, -1)
-  )
-
-colnames(t.simpar) <- c("Treatment", "Mean age", "Mean disease severity")
-kable(t.simpar, caption = "Sampling means")
-
-```
-
-And the following covariance matrix:
-```{r}
-t.simsigma <- matrix(c(2, 0, 0, 2), ncol = 2)
-colnames(t.simsigma) <- rownames(t.simsigma) <- c("x1", "x2")
-
-kable(t.simsigma, caption = "Variance-covariance matrix of the baseline covariates")
-
-```
-
-
-### Directed acyclic graph
-
-To illustrate the relation between the treatment, the outcome and the treatment covariate interactions, a Directed acyclic graph is used. A, B, and C indicate the three treatment groups, Y is the outcome and x1 and x2 depict the covariates (age and disease severity). Both covariates influence the outcome  $y_i$, but only in the presence of HTE do they also influence treatment B and C. 
- 
-#### Scenario 1: Absence of HTE    
-<br />  
-DAG in the absence of HTE  
-
-```{r dag-scenario1}
-dag <- dagitty('dag {
-bb="-2.65,-2.559,2.611,2.61"
-Y [outcome,pos="1.979,0.586"]
-A [exposure,pos="-1.780,-0.206"]
-B [exposure,pos="-1.780,0.486"]
-C [exposure,pos="-1.820,1.196"]
-x1 [adjusted,pos="-0.060,1.940"]
-x2 [adjusted,pos="0.959,1.940"]
-A -> Y
-B -> Y
-C -> Y
-x1 -> Y
-x2 -> Y
-}
-')
-
-ggdag(dag) + theme_dag() + geom_dag_text(col = "white")
-
-```
-
-  
-#### Scenario 2: Presence of HTE  
-<br /> 
-DAG in the presence of HTE  
-   
-```{r, dag-scenario2}
-dag <- dagitty('dag {
-bb="-2.65,-2.559,2.611,2.61"
-Y [outcome,pos="1.979,0.586"]
-A [exposure,pos="-1.780,-0.206"]
-B [exposure,pos="-1.780,0.486"]
-C [exposure,pos="-1.820,1.196"]
-x1 [adjusted,pos="-0.060,1.940"]
-x2 [adjusted,pos="0.959,1.940"]
-A -> Y
-B -> Y
-C -> Y
-x1 -> Y
-x1 -> A
-x1 -> B
-x1 -> C
-x2 -> Y
-}
-')
-
-ggdag(dag) + theme_dag() + geom_dag_text(col = "white")
-
-```
-   
 ### Implementation of pairwise matching 
 
 We applied 1:1 PS nearest-neighbor matching with a caliper and with replacement for each pairwise treatment comparison. We estimated the propensity score with a logistic regression model as a function of the two baseline covariates separately for each treatment comparison to mimic how pairwise matching would be repetitively applied in the context of three treatments being compared. We used a caliper of 0.05 standard deviation of the logit of the estimated PS. We assessed covariates balance pre- and post-matching with absolute standardized mean differences.  

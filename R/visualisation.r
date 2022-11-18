@@ -596,7 +596,7 @@ densplot_matched_samples <- function(sim,
   return(g)
 }
 
-save_all_loveplots <- function(scenario){
+save_all_loveplots <- function(scenario, saveimg = T){
   library(gridExtra)
   library(ggpubr)
   library(cobalt)  
@@ -626,16 +626,25 @@ save_all_loveplots <- function(scenario){
     plots[[i]] <- plot_loveplot(fit)
   }
   
+  if(saveimg == T) {
   ggarrange(plotlist = plots, nrow = 3, ncol = 2,  labels = c("A)", "B)", "C)", "D)", "E)", "F)"), common.legend = TRUE, legend="bottom") %>% 
-    ggexport(filename = paste0("Figures/", scenario, "/All love plots.png"),
-             width = 900, height = 900, res = 100)
+    ggexport(filename = paste0("Figures/", scenario, "/All love plots.png"),width = 900, height = 900, res = 100)
+  } else {
+    ggarrange(plotlist = plots, nrow = 3, ncol = 2,  labels = c("A)", "B)", "C)", "D)", "E)", "F)"), common.legend = TRUE, legend="bottom")
+  }
 }
 
 
-save_all_balanceplots <- function(scenario){
+save_all_balanceplots <- function(scenario, saveimg = T){
   plots <- list()
   colors1 <- c(2,1,3,1,3,2)
   colors2 <- c(1,2,1,3,2,3)
+  files <- c("A_AB",
+             "A_AC",
+             "B_AB",
+             "B_BC",
+             "C_AC",
+             "C_BC")
   colors <- brewer.pal(3, "Set2")
   count <- 0
   for(i in files){
@@ -646,15 +655,20 @@ save_all_balanceplots <- function(scenario){
     plots[[i]] <- bal.plot(fit, var.name = "distance", which = "both",
                            type = "histogram", mirror = T, sample.names = c("Pre-matching", "Post-matching")) + 
       scale_fill_manual(name = "", values = c(colors[colors1[count]], colors[colors2[count]]), 
-                        labels = c(ifelse(fit$target_population == str_split(fit$target_comparison, "_vs_")[[1]][2], str_split(fit$target_comparison, "_vs_")[[1]][1], str_split(fit$target_comparison,                                  "_vs_")[[1]][2]),  fit$target_population))+
+                        labels = c(ifelse(fit$target_population == str_split(fit$target_comparison, "")[[1]][2], str_split(fit$target_comparison, "")[[1]][1], 
+                                          str_split(fit$target_comparison,"")[[1]][2]),  fit$target_population))+
       scale_x_continuous(name= paste("Probability of being treated with", fit$target_population))+
       scale_y_continuous(limits = c(-0.27, 0.27), breaks = c(-0.2, -0.1, 0, 0.1, 0.2), labels= c(0.2, 0.1, 0, 0.1, 0.2))+
       ggtitle("")
     
   }
-  ggarrange(plotlist = plots, nrow = 3, ncol = 2,  labels = c("A)", "B)", "C)", "D)", "E)", "F)"), common.legend = F, legend="bottom") %>%
-    ggexport(filename = paste0("Figures/", scenario, "/All balance plots.png"),
-             width = 900, height = 900, res = 100) 
+  
+  if(saveimg == T) {
+    ggarrange(plotlist = plots, nrow = 3, ncol = 2,  labels = c("A)", "B)", "C)", "D)", "E)", "F)"), common.legend = F, legend="bottom") %>%
+              ggexport(filename = paste0("Figures/", scenario, "/All balance plots.png"), width = 900, height = 900, res = 100) 
+  } else {
+    ggarrange(plotlist = plots, nrow = 3, ncol = 2,  labels = c("A)", "B)", "C)", "D)", "E)", "F)"), common.legend = F, legend="bottom") 
+  }
 }
 
 generate_figures <- function(scenario_num = 1) {
