@@ -1,5 +1,8 @@
 library(ggplot2)
 library(ggridges) # Joy plots
+require(ggVennDiagram)
+require(ggpubr)
+require(gridExtra)
 library(tidyr)
 library(dplyr) # Facilitate data manipulation
 library(car) # Drawing of ellipses
@@ -7,6 +10,136 @@ library(Hmisc)
 library(stringr)
 library(RColorBrewer)
 
+ven_theme <- function(){
+  theme(legend.position = "bottom",
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_blank(),
+        panel.border = element_rect(fill = NA, size = 1),
+        plot.title.position = "plot",
+        axis.title = element_text(size = 13))
+}
+
+get_legend <- function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+
+generate_fig1 <- function() {
+
+  x <- list(C=1:5, B=2:7, A=3:6)
+  # "#66C2A5" "#FC8D62" "#8DA0CB" 
+  venn <- Venn(x)
+  data <- process_data(venn)
+  p <- ggplot() +
+    # 1. region count layer
+    geom_sf(aes(fill = count), data = venn_region(data), show.legend = FALSE) +
+    # 2. set edge layer
+    geom_sf(aes(color = name), data = venn_setedge(data), show.legend = TRUE, size = 0.7) +
+    # 3. set label layer
+    # geom_sf_text(aes(label = name), data = venn_setlabel(data)) +
+    # 4. region label layer
+    scale_color_manual(name = "",
+                       values = c("A" = "#66C2A5","B" ="#FC8D62", 'C' = '#8DA0CB'),
+                       labels = c('A' = 'Treatment A',
+                                  'B' = 'Treatment B',
+                                  'C' = 'Treatment C')) +
+    xlab(expression("x"[1])) +
+    ylab(expression("x"[2])) +
+    guides(color = guide_legend(reverse = TRUE))
+  
+  
+  
+  p$layers[[1]]$mapping <- aes(fill = name)
+  
+  yes <- "#E5E7E9"
+    no  <- "white"
+      isect <- "#D7DBDD"
+        
+      p1 <- p + scale_fill_manual(values = c(A = yes, 
+                                             B..A = isect,
+                                             C..A = isect,
+                                             C..B..A = isect,
+                                             B = yes,
+                                             C = yes,
+                                             C..B = isect),
+                                  guide = "none") +
+        ggtitle("A)") +
+        ven_theme()
+      
+      legend <- get_legend(p1)
+      
+      p1 <- p1 + theme(legend.position="none") 
+      
+      
+      p2 <- p + scale_fill_manual(values = c(A = yes, 
+                                             B..A = yes,
+                                             C..A = yes,
+                                             C..B..A = yes,
+                                             B = no,
+                                             C = no,
+                                             C..B = no),
+                                  guide = "none") +
+        ggtitle("B)") +
+        ven_theme()+ 
+        theme(legend.position="none") 
+      
+      
+      p3 <- p + scale_fill_manual(values = c(A = no, 
+                                             B..A = yes,
+                                             C..A = no,
+                                             C..B..A = yes,
+                                             B = yes,
+                                             C = no,
+                                             C..B = yes),
+                                  guide = "none") +
+        ggtitle("C)") +
+        ven_theme()+ 
+        theme(legend.position="none") 
+
+      
+      p4 <- p + scale_fill_manual(values = c(A = yes, 
+                                             B..A = yes,
+                                             C..A = no,
+                                             C..B..A = yes,
+                                             B = no,
+                                             C = no,
+                                             C..B = no),
+                                  guide = "none") +
+        ggtitle("D)") +
+        ven_theme()+ 
+        theme(legend.position="none") 
+      
+      p5 <- p + scale_fill_manual(values = c(A = yes, 
+                                             B..A = no,
+                                             C..A = yes,
+                                             C..B..A = yes,
+                                             B = no,
+                                             C = no,
+                                             C..B = no),
+                                  guide = "none") +
+        ggtitle("E)") +
+        ven_theme()+ 
+        theme(legend.position="none") 
+      
+      p6 <- p + scale_fill_manual(values = c(A = no, 
+                                             B..A = no,
+                                             C..A = no,
+                                             C..B..A = yes,
+                                             B = no,
+                                             C = no,
+                                             C..B = no),
+                                  guide = "none") +
+        ggtitle("F)") +
+        ven_theme()+ 
+        theme(legend.position="none") 
+      
+      grid.arrange(grobs = list(p1, p2, p3, p4, p5, p6), ncol = 3)
+
+}
 
 densplot_X <- function(sim, ggtype = "density2d", palette = "Set1") {
   
