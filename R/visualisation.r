@@ -136,8 +136,9 @@ generate_fig1 <- function() {
         ggtitle("F)") +
         ven_theme()+ 
         theme(legend.position="none") 
-      
-      grid.arrange(grobs = list(p1, p2, p3, p4, p5, p6), ncol = 3)
+
+      g <- grid.arrange(grobs = list(p1, p2, p3, p4, p5, p6), ncol = 3)
+      ggsave(file="venn.png", width = 20, height = 14, g) #saves g
 
 }
 
